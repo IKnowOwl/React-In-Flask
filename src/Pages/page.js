@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Login } from "../Components/Login";
-import Upload from "../Components/Photo";
+import { Upload , AfterUpload } from "../Components/Photo";
 import {login, useAuth, logout} from "../auth"
 import {
   BrowserRouter as Router,
@@ -15,10 +15,8 @@ export const ImageApp = ()=> {
     <Router>
       <div>
         <Switch>
-            <Route path='/zoom'>
-            <Zoom />
-            </Route>
           <PrivateRoute path="/upload" component={Upload} />
+          <PrivateRoute path="/afterupload" component={AfterUpload} />
           <Route path="/">
             <Login />
           </Route>

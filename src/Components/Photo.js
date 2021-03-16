@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, Component } from "react";
+import axios from 'axios';
+import { useHistory } from 'react-router-dom'
+import ReactImageZoom from 'react-image-zoom';
 import {login, useAuth, authFetch, logout} from "../auth";
+import { useLocation } from 'react-router-dom'
 import {
   BrowserRouter as Router,
   Switch,
@@ -8,58 +12,52 @@ import {
   Link
 } from "react-router-dom";
 
-
-export default class Upload extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      imageURL: '',
-    };
-
-    this.handleUploadImage = this.handleUploadImage.bind(this);
-  }
-
-  handleUploadImage(ev) {
-    ev.preventDefault();
-
-    const data = new FormData();
-    data.append('file', this.uploadInput.files[0]);
-
-
-
-    authFetch('http://localhost:5000/api/upload', {
-      method: 'POST',
-      body: data,
-    }).then((response) => {
-      response.json().then((body) => {
-        alert("Upload Successful")
-        logout()
-        console.log(response.filename)
-        this.setState({ imageURL: `http://localhost:5000/api/${body.file}` })
-    });
-    }).then(response => {
-      if (response && response.filename){
-        console.log(response.filename)
-      }
-    })
-  }
-
-  render() {
+export const Upload = () => {
+    const history = useHistory()
+    const [selectedFile, setSelectedFile] = useState(null)
+    const onFileChange = e => {
+        setSelectedFile(e.target.files[0])
+    }
+    const onFileUpload = () => {
+        const formData = new FormData()
+        formData.append('pic', selectedFile, selectedFile.name)
+        history.push({
+           pathname:'/AfterUpload',
+            state:{selectedFile}
+        })
+    
+    }
     return (
-      <>
-      <button onClick={() => logout()}>Logout</button>  
-      <form onSubmit={this.handleUploadImage}>
         <div>
-          <input ref={(ref) => { this.uploadInput = ref; }} type="file" />
+            <form onSubmit={onFileUpload}>
+                <input type="file" onChange={onFileChange} required/>
+                <button type="submit">Upload</button>
+            </form>
         </div>
-        <br />
+    )
+}
+
+export const AfterUpload = () => {
+    const location = useLocation()
+    const objectUrl = URL.createObjectURL(location.state.selectedFile)
+    const [imageSrc, setImageSrc] = useState(objectUrl)
+    
+    const fileData = () => {       
+        return(
+            <div>
+                <h2>file details:</h2>
+                <p>file name: {location.state.selectedFile.name}</p>
+                <p>file type: {location.state.selectedFile.type}</p>
+            </div>
+        )  
+    }
+    const props = { width: 400, height: 250, scale:2,zoomPosition: 'bottom', img:imageSrc}
+    return (
+
         <div>
-          <button>Upload</button>
+         <button onClick={() => logout()}>Logout</button>
+            <ReactImageZoom {...props}/>
+            {fileData()}
         </div>
-        <img src={this.state.imageURL} alt="img" />
-      </form>
-      </>
-    );
-  }
+    )
 }

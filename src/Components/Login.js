@@ -21,7 +21,7 @@ export const Login = ()=> {
       'password': password
     }
     console.log(opts)
-    fetch('/api/login', {
+    fetch('https://floating-waters-03184.herokuapp.com//api/login', {
       method: 'post',
       body: JSON.stringify(opts)
     }).then(r => r.json())
